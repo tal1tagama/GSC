@@ -1,0 +1,34 @@
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const methodOverride = require('method-override');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Configuração do Mongoose
+mongoose.connect(process.env.MONGODB_URI)
+.then(() => console.log('Conectado ao MongoDB'))
+.catch(err => console.error('Erro ao conectar ao MongoDB:', err));
+
+// Middlewares
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(methodOverride('_method'));
+app.use(express.static('public'));
+
+// Rotas da API
+const usuarioRoutes = require('./routes/usuarios');
+app.use('/api/usuarios', usuarioRoutes);
+
+// Rota principal - servir o HTML
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Iniciar servidor
+app.listen(PORT, () => {
+  console.log(`ervidor rodando na porta ${PORT}`);
+  console.log(`http://localhost:${PORT}`);
+});
