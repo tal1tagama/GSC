@@ -3,11 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const mensagemDiv = document.getElementById('mensagem');
     const listaUsuarios = document.getElementById('listaUsuarios');
     
+    let isEditMode = false;
+    let editingId = null;
+    
     // Carregar usuários ao iniciar a página
     carregarUsuarios();
     
     // Evento de submissão do formulário
-    usuarioForm.addEventListener('submit', async (e) => {
+    usuarioForm.addEventListener('submit', handleSubmit);
+    
+    async function handleSubmit(e) {
         e.preventDefault();
         
         const usuario = {
@@ -17,19 +22,36 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         try {
-            const response = await fetch('/api/usuarios', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(usuario)
-            });
+            let response;
+            
+            if (isEditMode) {
+                // Atualizar usuário existente
+                response = await fetch(`/api/usuarios/${editingId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(usuario)
+                });
+            } else {
+                // Criar novo usuário
+                response = await fetch('/api/usuarios', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(usuario)
+                });
+            }
             
             const data = await response.json();
             
             if (response.ok) {
-                mostrarMensagem('Usuário cadastrado com sucesso!', 'success');
-                usuarioForm.reset();
+                mostrarMensagem(
+                    isEditMode ? 'Usuário atualizado com sucesso!' : 'Usuário cadastrado com sucesso!',
+                    'success'
+                );
+                resetarFormulario();
                 carregarUsuarios();
             } else {
                 mostrarMensagem(`Erro: ${data.erro}`, 'error');
@@ -38,7 +60,16 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarMensagem('Erro ao conectar com o servidor', 'error');
             console.error('Erro:', erro);
         }
-    });
+    }
+    
+    // Função para resetar o formulário
+    function resetarFormulario() {
+        usuarioForm.reset();
+        isEditMode = false;
+        editingId = null;
+        const submitBtn = usuarioForm.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Cadastrar';
+    }
     
     // Função para carregar a lista de usuários
     async function carregarUsuarios() {
@@ -108,50 +139,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('email').value = usuario.email;
                     document.getElementById('idade').value = usuario.idade;
                     
-                    // Alterar funcionamento do formulário para atualizar
+                    // Alterar para modo de edição
+                    isEditMode = true;
+                    editingId = id;
+                    
                     const submitBtn = usuarioForm.querySelector('button[type="submit"]');
                     submitBtn.textContent = 'Atualizar';
                     
-                    // Remover evento antigo e adicionar novo para atualização
-                    usuarioForm.removeEventListener('submit', handleSubmit);
-                    usuarioForm.addEventListener('submit', async function handleUpdate(e) {
-                        e.preventDefault();
-                        
-                        const usuarioAtualizado = {
-                            nome: document.getElementById('nome').value,
-                            email: document.getElementById('email').value,
-                            idade: parseInt(document.getElementById('idade').value)
-                        };
-                        
-                        try {
-                            const response = await fetch(`/api/usuarios/${id}`, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify(usuarioAtualizado)
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (response.ok) {
-                                mostrarMensagem('Usuário atualizado com sucesso!', 'success');
-                                usuarioForm.reset();
-                                submitBtn.textContent = 'Cadastrar';
-                                carregarUsuarios();
-                                
-                                // Restaurar comportamento original do formulário
-                                usuarioForm.removeEventListener('submit', handleUpdate);
-                                usuarioForm.addEventListener('submit', handleSubmit);
-                            } else {
-                                mostrarMensagem(`Erro: ${data.erro}`, 'error');
-                            }
-                        } catch (erro) {
-                            mostrarMensagem('Erro ao conectar com o servidor', 'error');
-                        }
-                    });
+                    // Scroll para o formulário
+                    usuarioForm.scrollIntoView({ behavior: 'smooth' });
                 } catch (erro) {
                     mostrarMensagem('Erro ao carregar dados do usuário', 'error');
+                    console.error('Erro:', erro);
                 }
             });
         });

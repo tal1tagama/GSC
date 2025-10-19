@@ -18,6 +18,12 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 app.use(express.static('public'));
 
+// Log de requisições para debug
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
 // Rotas da API
 const usuarioRoutes = require('./routes/usuario');
 app.use('/api/usuarios', usuarioRoutes);
