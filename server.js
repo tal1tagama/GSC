@@ -19,7 +19,7 @@ app.use(methodOverride('_method'));
 app.use(express.static('public'));
 
 // Rotas da API
-const usuarioRoutes = require('./routes/usuarios');
+const usuarioRoutes = require('./routes/usuario');
 app.use('/api/usuarios', usuarioRoutes);
 
 // Rota principal - servir o HTML
