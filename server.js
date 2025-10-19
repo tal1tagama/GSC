@@ -29,6 +29,6 @@ app.get('/', (req, res) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`ervidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
   console.log(`http://localhost:${PORT}`);
 });
