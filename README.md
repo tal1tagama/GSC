@@ -35,3 +35,8 @@ A equipe de desenvolvimento pode trabalhar de forma colaborativa, utilizando **G
 1. **Clone este repositório:**
    ```bash
    git clone https://github.com/tal1tagama/GSC.git
+   
+---
+
+## 🛠️ Execução 
+npm install npm run dev Navegador: http://localhost:3000 *Uso* Acesse a interface web via navegador. Cadastro de usuário   
